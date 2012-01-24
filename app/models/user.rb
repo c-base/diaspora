@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   include Diaspora::UserModules
   include Encryptor::Private
 
-  devise :invitable, :database_authenticatable, :registerable,
+  devise :invitable, :ldap_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
          :timeoutable, :token_authenticatable, :lockable,
          :lock_strategy => :none, :unlock_strategy => :none
@@ -66,7 +66,9 @@ class User < ActiveRecord::Base
                   :invitation_identifier,
                   :show_community_spotlight_in_stream,
                   :auto_follow_back,
-                  :auto_follow_back_aspect_id
+                  :auto_follow_back_aspect_id,
+                  :remember_me,
+                  :username
 
 
   def self.all_sharing_with_person(person)
