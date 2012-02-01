@@ -533,13 +533,18 @@ class User < ActiveRecord::Base
     self.save(:validate => false)
   end
 
+  # LDAP User-creation does not know anythin about diaspora internals, so we
+  # need to call setup manually with username and email.
   def ldap_before_save
-    puts "called ldap before save"
-    guard_unconfirmed_email()
-    save_person!()
+    setup :username => username, :email => get_ldap_email
   end
 
   private
+
+  def get_ldap_email
+    Devise::LdapAdapter.get_ldap_param(username, "mail")
+  end
+
   def clearable_fields
     self.attributes.keys - ["id", "username", "encrypted_password",
                             "created_at", "updated_at", "locked_at",
