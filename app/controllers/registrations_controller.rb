@@ -6,6 +6,9 @@ class RegistrationsController < Devise::RegistrationsController
   before_filter :check_registrations_open!
 
   def create
+    puts "create registration called"
+    debugger
+    puts params[:user]
     @user = User.build(params[:user])
     if @user.save
       flash[:notice] = I18n.t 'registrations.create.success'

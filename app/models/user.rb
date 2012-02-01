@@ -533,6 +533,12 @@ class User < ActiveRecord::Base
     self.save(:validate => false)
   end
 
+  def ldap_before_save
+    puts "called ldap before save"
+    guard_unconfirmed_email()
+    save_person!()
+  end
+
   private
   def clearable_fields
     self.attributes.keys - ["id", "username", "encrypted_password",
