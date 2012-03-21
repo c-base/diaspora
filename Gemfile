@@ -14,7 +14,7 @@ gem 'rack-cors', '~> 0.2.4', :require => 'rack/cors'
 
 # authentication
 
-gem "devise_ldap_authenticatable", :git => "git://github.com/cschiewek/devise_ldap_authenticatable.git"
+gem "devise_ldap_authenticatable"
 gem 'devise', '1.5.3'
 gem 'jwt'
 gem 'oauth2-provider', '0.0.19'
