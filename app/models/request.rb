@@ -4,8 +4,7 @@
 #   the COPYRIGHT file.
 
 class Request
-  include ROXML
-  include Diaspora::Webhooks
+  include Diaspora::Federated::Base
   include ActiveModel::Validations
 
   attr_accessor :sender, :recipient, :aspect
@@ -80,7 +79,7 @@ class Request
     contact.sharing = true
     contact.save
     
-    user.share_with(person, user.auto_follow_back_aspect) if user.auto_follow_back
+    user.share_with(person, user.auto_follow_back_aspect) if user.auto_follow_back && !contact.receiving
 
     self
   end

@@ -12,6 +12,11 @@
 
   textFormatter.markdownify = function markdownify(text){
     var converter = Markdown.getSanitizingConverter();
+
+    converter.hooks.chain("postConversion", function (text) {
+      return text.replace(/(\"(?:(?:http|https):\/\/)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?\")(\>)/g, '$1 target="_blank">')
+    });
+
     return converter.makeHtml(text)
   };
 
@@ -28,8 +33,8 @@
       var person = _.find(mentions, function(person){
         return person.diaspora_id == diasporaId
       })
-      
-      return person ? "<a href='/people/" + person.id + "' class='mention'>" + fullName + "</a>" : fullName;
+
+      return person ? "<a href='/people/" + person.guid + "' class='mention'>" + fullName + "</a>" : fullName;
     })
   }
 

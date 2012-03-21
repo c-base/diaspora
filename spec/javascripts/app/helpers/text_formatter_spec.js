@@ -40,7 +40,9 @@ describe("app.helpers.textFormatter", function(){
       var wrapper = $("<div>").html(formattedText);
 
       _.each(links, function(link) {
-        expect(wrapper.find("a[href='" + link + "']").text()).toContain(link)
+        var linkElement = wrapper.find("a[href='" + link + "']");
+        expect(linkElement.text()).toContain(link);
+        expect(linkElement.attr("target")).toContain("_blank");
       })
     })
   })
@@ -101,7 +103,7 @@ describe("app.helpers.textFormatter", function(){
         var wrapper = $("<div>").html(formattedText);
 
         _.each([this.alice, this.bob], function(person) {
-          expect(wrapper.find("a[href='/people/" + person.id + "']").text()).toContain(person.name)
+          expect(wrapper.find("a[href='/people/" + person.guid + "']").text()).toContain(person.name)
         })
       });
 

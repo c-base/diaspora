@@ -1,4 +1,5 @@
 app.views.StreamFaces = app.views.Base.extend({
+  
   templateName : "stream-faces",
 
   className : "stream-faces",
@@ -25,4 +26,4 @@ app.views.StreamFaces = app.views.Base.extend({
 
     this.render();
   }
-})
+});

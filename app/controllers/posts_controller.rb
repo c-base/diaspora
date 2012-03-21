@@ -2,6 +2,8 @@
 #   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
+require Rails.root.join("app", "presenters", "post_presenter")
+
 class PostsController < ApplicationController
   before_filter :authenticate_user!, :except => :show
   before_filter :set_format_if_malformed_from_status_net, :only => :show
@@ -16,13 +18,12 @@ class PostsController < ApplicationController
 
     if user_signed_in?
       @post = current_user.find_visible_shareable_by_id(Post, params[:id], :key => key)
-      @commenting_disabled = user_can_not_comment_on_post?
     else
       @post = Post.where(key => params[:id], :public => true).includes(:author, :comments => :author).first
-      @commenting_disabled = true
     end
 
     if @post
+      # @commenting_disabled = can_not_comment_on_post?
       # mark corresponding notification as read
       if user_signed_in? && notification = Notification.where(:recipient_id => current_user.id, :target_id => @post.id).first
         notification.unread = false
@@ -32,8 +33,8 @@ class PostsController < ApplicationController
       respond_to do |format|
         format.xml{ render :xml => @post.to_diaspora_xml }
         format.mobile{render 'posts/show.mobile.haml'}
-        format.json{ render :json => {:posts => @post.as_api_response(:backbone)}, :status => 201 }
-        format.any{render 'posts/show.html.haml'}
+        format.json{ render :json => PostPresenter.new(@post, current_user).to_json }
+        format.any{render 'posts/show.html.haml', :layout => 'layouts/post'}
       end
 
     else
@@ -51,7 +52,7 @@ class PostsController < ApplicationController
       respond_to do |format|
         format.js {render 'destroy'}
         format.json { render :nothing => true, :status => 204 }
-        format.all {redirect_to multi_stream_path}
+        format.all {redirect_to stream_path}
       end
     else
       Rails.logger.info "event=post_destroy status=failure user=#{current_user.diaspora_handle} reason='User does not own post'"
@@ -65,8 +66,10 @@ class PostsController < ApplicationController
    request.format = :html if request.format == 'application/html+xml'
   end
 
-  def user_can_not_comment_on_post?
-    if @post.public && @post.author.local?
+  def can_not_comment_on_post?
+    if !user_signed_in?
+      true
+    elsif @post.public && @post.author.local?
       false
     elsif current_user.contact_for(@post.author)
       false

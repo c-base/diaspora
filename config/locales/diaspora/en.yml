@@ -33,6 +33,7 @@ en:
   public: "Public"
   limited: "Limited"
   search: "Search"
+  nsfw: "NSFW"
   find_people: "Find people or #tags"
   _home: "Home"
   more: "More"
@@ -158,7 +159,6 @@ en:
     index:
       donate: "Donate"
       keep_us_running: "Keep %{pod} running fast and buy servers their coffee fix with a monthly donation!"
-      your_aspects: "Your Aspects"
       no_tags: "+ Find a tag to follow"
       unfollow_tag: "Stop following #%{tag}"
       handle_explanation: "This is your Diaspora ID. Like an email address, you can give this to people to reach you."
@@ -252,7 +252,10 @@ en:
       title: "Contacts"
       your_contacts: "Your Contacts"
       no_contacts: "Looks like you need to add some contacts!"
-      check_out: "Check out"
+      no_contacts_message: "Check out %{community_spotlight}"
+      no_contacts_message_with_aspect: "Check out %{community_spotlight} or %{add_to_aspect_link}"
+      add_to_aspect_link: "add contacts to %{name}"
+      community_spotlight: "Community Spotlight"
       my_contacts: "My Contacts"
       all_contacts: "All Contacts"
       only_sharing_with_me: "Only sharing with me"
@@ -316,6 +319,8 @@ en:
       simplicity_explanation: "Diaspora makes sharing clean and easy – and this goes for privacy too. Inherently private, Diaspora doesn’t make you wade through pages of settings and options just to keep your profile secure."
       learn_about_host: "Learn about how to host your own Diaspora server."
 
+  invitation_codes:
+    excited: "%{name} is excited to see you here."
   invitations:
     create:
       sent: "Invitations have been sent to: "
@@ -329,13 +334,23 @@ en:
       invite_someone_to_join: "Invite someone to join Diaspora!"
       if_they_accept_info: "if they accept, they will be added to the aspect you invited them."
       comma_seperated_plz: "You can enter multiple email addresses separated by commas."
+      check_out_diaspora: "Hey! You should check out Diaspora*"
       to: "To"
       personal_message: "Personal message"
       send_an_invitation: "Send an invitation"
       send_invitation: "Send invitation"
+      paste_link: "Share this link with your friends to invite them to Diaspora*, or email them the link directly."
+      codes_left:
+        zero:  "No invites left on this code"
+        one:  "One invite left on this code"
+        two:  "%{count} invites left on this code"
+        few:  "%{count} invites left on this code"
+        many:  "%{count} invites left on this code"
+        other:  "%{count} invites left on this code"
       aspect: "Aspect"
       already_invited: "The following people have not accepted your invitation:"
       resend: "Resend"
+      check_out_diaspora: "Check out Diaspora!"
     check_token:
       not_found: "Invitation token not found"
     edit:
@@ -468,6 +483,7 @@ en:
     index:
       notifications: "Notifications"
       mark_all_as_read: "Mark All as Read"
+      mark_unread: "Mark unread"
       and_others:
         zero: "and nobody else"
         one: "and one more"
@@ -515,6 +531,24 @@ en:
     confirm_email:
         subject: "Please activate your new email address %{unconfirmed_email}"
         click_link: "To activate your new email address %{unconfirmed_email}, please follow this link:"
+    accept_invite: "Accept Your Diaspora* invite!"
+    invited_you: "%{name} invited you to Diaspora*"
+    invite:
+      message: |-
+        Hello!
+        
+        You have been invited to join Diaspora*!
+        
+        Click this link to get started
+        
+        %{invite_url}
+        <%= invite_code_url(@invitation_code)%>
+        
+        
+        Love,
+        
+        The Diaspora* email robot!
+  
   people:
     zero: "no people"
     one: "1 person"
@@ -532,6 +566,7 @@ en:
       no_results: "Hey! You need to search for something."
       couldnt_find_them_send_invite: "Couldn't find them?  Send an invite!"
       no_one_found: "...and no one was found."
+      searching: "searching, please be patient..."
       looking_for: "Looking for posts tagged %{tag_link}?"
     webfinger:
       fail: "Sorry, we couldn't find %{handle}."
@@ -570,6 +605,9 @@ en:
       edit_membership: "edit aspect membership"
     add_contact_small:
       add_contact_from_tag: "add contact from tag"
+    last_post: "Last Post"
+    add_contact:
+      invited_by: "you were invited by"
 
   photos:
     show:
@@ -607,6 +645,8 @@ en:
     comment_email_subject: "%{name}'s photo"
 
   posts:
+    presenter:
+      title: "A post from %{name}"
     show:
       destroy: "Delete"
       permalink: "permalink"
@@ -644,6 +684,8 @@ en:
       update_profile: "Update Profile"
       allow_search: "Allow for people to search for you within Diaspora"
       edit_profile: "Edit profile"
+      you_are_nsfw: "You have marked yourself not safe for work, your content will not show up in people who have opted out of seeing objectionable content's streams."
+      you_are_safe_for_work: "You have marked yourself as safe for work, this means you agree the content you post will agree with the community guidelines."
     update:
       updated: "Profile updated"
       failed: "Failed to update profile"
@@ -669,6 +711,7 @@ en:
       update: "Update"
       cancel_my_account: "Cancel my account"
     closed: "Signups are closed on this Diaspora pod."
+    invalid_invite: "The invite link you provided is no longer valid!"
 
   requests:
     manage_aspect_contacts:
@@ -800,6 +843,7 @@ en:
       outside: "Public messages will be available for others outside of Diaspora to see."
       logged_in: "logged in to %{service}"
       manage: "manage connected services"
+      atom_feed: "Atom feed"
     notification:
       new: "New %{type} from %{from}"
     contact_list:
@@ -923,8 +967,10 @@ en:
       contacts_title: "People in your Stream"
 
     aspects:
-      title: "Your Aspects"
+      title: "My Aspects"
 
+    activity:
+      title: "My Activity"
   users:
     logged_out:
       signed_out: "You've signed out of Diaspora*"
@@ -942,6 +988,8 @@ en:
       change_email: "Change email"
       new_password: "New password"
       current_password: "Current password"
+      current_password_expl: "the one you sign in with..."
+      character_minimum_expl: "must be at least six characters"
       download_xml: "download my xml"
       download_photos: "download my photos"
       your_handle: "Your Diaspora ID"

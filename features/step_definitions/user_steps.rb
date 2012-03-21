@@ -7,40 +7,40 @@ Given /^a user with username "([^\"]*)" and password "([^\"]*)"$/ do |username, 
 end
 
 Given /^a user with email "([^\"]*)"$/ do |email|
-  user = Factory(:user, :email => email, :password => 'password',
-                 :password_confirmation => 'password', :getting_started => false)
-  user.aspects.create(:name => "Besties")
-  user.aspects.create(:name => "Unicorns")
+  create_user(:email => email)
 end
 
 Given /^a user with username "([^\"]*)"$/ do |username|
-  user = Factory(:user, :email => username + "@" + username + '.' + username, :username => username,
-                 :password => 'password', :password_confirmation => 'password', :getting_started => false)
-  user.aspects.create(:name => "Besties")
-  user.aspects.create(:name => "Unicorns")
+  create_user(:email => username + "@" + username + '.' + username, :username => username)
 end
 
 Given /^a user named "([^\"]*)" with email "([^\"]*)"$/ do |name, email|
   first, last = name.split
-  username = "#{first}_#{last}" if first
-  user = Factory(:user, :email => email, :password => 'password', :username => "#{first}_#{last}",
-                 :password_confirmation => 'password', :getting_started => false)
-
+  user = create_user(:email => email, :username => "#{first}_#{last}")
   user.profile.update_attributes!(:first_name => first, :last_name => last) if first
-  user.aspects.create!(:name => "Besties")
-  user.aspects.create!(:name => "Unicorns")
+end
+
+Given /^a nsfw user with email "([^\"]*)"$/ do |email|
+  user = create_user(:email => email)
+  user.profile.update_attributes(:nsfw => true)
 end
 
 Given /^I have been invited by an admin$/ do
-  i = Invitation.create!(:admin => true, :service => 'email', :identifier => "new_invitee@example.com")
-  @me = i.attach_recipient!
+  admin = Factory(:user)
+  admin.invitation_code
+  i = EmailInviter.new("new_invitee@example.com", admin)
+  i.send!
 end
 
-Given /^I have been invited by a user$/ do
-  @inviter = Factory(:user)
-  aspect = @inviter.aspects.create(:name => "Rocket Scientists")
-  i =  Invitation.create!(:aspect => aspect, :sender => @inviter, :service => 'email', :identifier => "new_invitee@example.com", :message =>"Hey, tell me about your rockets!")
-  @me = i.attach_recipient!
+Given /^I have been invited by bob$/ do
+  @inviter = Factory(:user, :email => 'bob@bob.bob')
+  @inviter_invite_count = @inviter.invitation_code.count
+  i = EmailInviter.new("new_invitee@example.com", @inviter)
+  i.send!
+end
+
+When /^I should see one less invite$/ do
+  step "I should see \"#{@inviter_invite_count -1} invites left\""
 end
 
 When /^I click on my name$/ do
@@ -166,4 +166,29 @@ Given /^I have (\d+) contacts$/ do |n|
     aspect_memberships << AspectMembership.new(:contact_id => contact.id, :aspect_id => aspect_id)
   end
   AspectMembership.import(aspect_memberships)
+end
+
+When /^I view "([^\"]*)"'s first post$/ do |email|
+  user = User.find_by_email(email)
+  post = user.posts.first
+  visit post_path(post)
+end
+
+Given /^I visit alice's invitation code url$/ do
+  @alice ||= Factory(:user, :username => 'alice', :getting_started => false)
+  invite_code  = InvitationCode.find_or_create_by_user_id(@alice.id)
+  visit invite_code_path(invite_code)
+end
+
+When /^I fill in the new user form$/ do
+  step 'I fill in "user_username" with "ohai"'
+  step 'I fill in "user_email" with "ohai@example.com"'
+  step 'I fill in "user_password" with "secret"'
+  step 'I fill in "user_password_confirmation" with "secret"'
+end
+
+And /^I should be able to friend Alice$/ do
+  alice = User.find_by_username 'alice'
+  step 'I should see "Add contact"'
+  step "I should see \"#{alice.name}\""
 end

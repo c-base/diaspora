@@ -5,8 +5,11 @@
 class Photo < ActiveRecord::Base
   require 'carrierwave/orm/activerecord'
 
+  include Diaspora::Federated::Shareable
   include Diaspora::Commentable
   include Diaspora::Shareable
+
+
 
   # NOTE API V1 to be extracted
   acts_as_api
@@ -32,6 +35,7 @@ class Photo < ActiveRecord::Base
   xml_attr :status_message_guid
 
   belongs_to :status_message, :foreign_key => :status_message_guid, :primary_key => :guid
+  validates_associated :status_message
 
   attr_accessible :text, :pending
   validate :ownership_of_status_message
@@ -67,7 +71,7 @@ class Photo < ActiveRecord::Base
     photo.pending = params[:pending] if params[:pending]
     photo.diaspora_handle = photo.author.diaspora_handle
 
-    photo.random_string = ActiveSupport::SecureRandom.hex(10)
+    photo.random_string = SecureRandom.hex(10)
 
     if params[:user_file]
       image_file = params.delete(:user_file)

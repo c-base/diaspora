@@ -1,6 +1,13 @@
 app.models.Stream = Backbone.Collection.extend({
   initialize : function(){
-    this.posts = new app.collections.Posts();
+    this.posts = new app.collections.Posts([], this.postOptions());
+  },
+
+  postOptions :function(){
+      var order = this.sortOrder();
+      return {
+          comparator : function(post) { return -post[order](); }
+      }
   },
 
   url : function(){
@@ -42,10 +49,19 @@ app.models.Stream = Backbone.Collection.extend({
   },
 
   timeFilteredPath : function(){
-   return this.basePath() + "?max_time=" + _.last(this.posts.models).createdAt();
+   return this.basePath() + "?max_time=" + this.maxTime();
+  },
+
+  maxTime: function(){
+    var lastPost = _.last(this.posts.models);
+    return lastPost[this.sortOrder()]()
+  },
+
+  sortOrder : function() {
+    return this.basePath().match(/activity/) ? "interactedAt" : "createdAt"
   },
 
   add : function(models){
     this.posts.add(models)
   }
-})
+});

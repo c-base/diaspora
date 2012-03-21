@@ -7,7 +7,7 @@
 # http://railscasts.com/episodes/158-factories-not-fixtures
 
 def r_str
-  ActiveSupport::SecureRandom.hex(3)
+  SecureRandom.hex(3)
 end
 
 FactoryGirl.define do
@@ -38,14 +38,14 @@ FactoryGirl.define do
     end
   end
 
-  factory :account_deletion do 
+  factory :account_deletion do
     association :person
     after_build do |delete|
       delete.diaspora_handle = delete.person.diaspora_handle
     end
   end
 
-  factory :searchable_person, :parent => :person do 
+  factory :searchable_person, :parent => :person do
     after_build do |person|
       person.profile = Factory.build(:profile, :person => person, :searchable => true)
     end
@@ -92,7 +92,7 @@ FactoryGirl.define do
     end
   end
 
-  factory(:status_message_with_photo, :parent => :status_message) do 
+  factory(:status_message_with_photo, :parent => :status_message) do
     sequence(:text) { |n| "There are #{n} ninjas in this photo." }
     after_build do |sm|
       Factory(:photo, :author => sm.author, :status_message => sm, :pending => false, :public => public)
@@ -100,7 +100,7 @@ FactoryGirl.define do
   end
 
   factory(:photo) do
-    sequence(:random_string) {|n| ActiveSupport::SecureRandom.hex(10) }
+    sequence(:random_string) {|n| SecureRandom.hex(10) }
     association :author, :factory => :person
     after_build do |p|
       p.unprocessed_image.store! File.open(File.join(File.dirname(__FILE__), 'fixtures', 'button.png'))
@@ -130,6 +130,12 @@ FactoryGirl.define do
     end
   end
 
+  factory :invitation_code do
+    sequence(:token){|n| "sdfsdsf#{n}"}
+    association :user
+    count 0
+  end
+
   factory :service do |service|
     nickname "sirrobertking"
     type "Services::Twitter"
@@ -139,7 +145,7 @@ FactoryGirl.define do
     sequence(:access_secret) { |token| "98765#{token}" }
   end
 
-  factory :service_user do 
+  factory :service_user do
     sequence(:uid) { |id| "a#{id}"}
     sequence(:name) { |num| "Rob Fergus the #{num.ordinalize}" }
     association :service
@@ -162,7 +168,7 @@ FactoryGirl.define do
     end
   end
 
-  factory(:activity_streams_photo, :class => ActivityStreams::Photo) do 
+  factory(:activity_streams_photo, :class => ActivityStreams::Photo) do
     association(:author, :factory => :person)
     image_url "#{AppConfig[:pod_url]}/images/asterisk.png"
     image_height 154
@@ -174,7 +180,7 @@ FactoryGirl.define do
     public true
   end
 
-  factory(:app, :class => OAuth2::Provider.client_class) do 
+  factory(:app, :class => OAuth2::Provider.client_class) do
     sequence(:name) { |token| "Chubbies#{token}" }
     sequence(:application_base_url) { |token| "http://chubbi#{token}.es/" }
 
@@ -189,7 +195,7 @@ FactoryGirl.define do
     association(:resource_owner, :factory => :user)
   end
 
-  factory(:oauth_access_token, :class => OAuth2::Provider.access_token_class) do 
+  factory(:oauth_access_token, :class => OAuth2::Provider.access_token_class) do
     association(:authorization, :factory => :oauth_authorization)
   end
 
@@ -197,7 +203,12 @@ FactoryGirl.define do
     name "partytimeexcellent"
   end
 
-  factory(:tag_following) do 
+  factory(:o_embed_cache) do
+    url "http://youtube.com/kittens"
+    data {{'data' => 'foo'}}
+  end
+
+  factory(:tag_following) do
     association(:tag, :factory => :tag)
     association(:user, :factory => :user)
   end
@@ -211,4 +222,27 @@ FactoryGirl.define do
     association(:person, :factory => :person)
     association(:post, :factory => :status_message)
   end
+
+  #templates
+  factory(:multi_photo, :parent => :status_message_with_photo) do
+    after_build do |sm|
+      2.times{ Factory(:photo, :author => sm.author, :status_message => sm, :pending => false, :public => public)}
+    end
+  end
+
+  factory(:status_with_photo_backdrop, :parent => :status_message_with_photo)
+
+  factory(:photo_backdrop, :parent => :status_message_with_photo) do
+    text ""
+  end
+
+  factory(:note, :parent => :status_message) do
+    text SecureRandom.hex(1000)
+  end
+
+  factory(:rich_media, :parent => :status_message) do
+    association(:o_embed_cache)
+  end
+
+  factory(:status, :parent => :status_message)
 end

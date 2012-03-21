@@ -3,13 +3,15 @@
 #   the COPYRIGHT file.
 
 class RegistrationsController < Devise::RegistrationsController
-  before_filter :check_registrations_open!
+  before_filter :check_registrations_open_or_vaild_invite!, :check_valid_invite!
 
   def create
     puts "create registration called"
     debugger
     puts params[:user]
     @user = User.build(params[:user])
+    @user.process_invite_acceptence(invite) if invite.present?
+
     if @user.save
       flash[:notice] = I18n.t 'registrations.create.success'
       @user.seed_aspects
@@ -17,7 +19,7 @@ class RegistrationsController < Devise::RegistrationsController
       Rails.logger.info("event=registration status=successful user=#{@user.diaspora_handle}")
     else
       @user.errors.delete(:person)
-
+      
       flash[:error] = @user.errors.full_messages.join(";")
       Rails.logger.info("event=registration status=failure errors='#{@user.errors.full_messages.join(', ')}'")
       render :new
@@ -29,10 +31,26 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   private
-  def check_registrations_open!
+  def check_valid_invite!
+    return true unless AppConfig[:registrations_closed] #this sucks
+    return true if invite && invite.can_be_used?
+    flash[:error] = t('registrations.invalid_invite')
+    redirect_to new_user_session_path
+  end
+
+  def check_registrations_open_or_vaild_invite!
+    return true if invite.present?
     if AppConfig[:registrations_closed]
       flash[:error] = t('registrations.closed')
       redirect_to new_user_session_path
     end
   end
+
+  def invite
+    if params[:invite].present?
+      @invite ||= InvitationCode.find_by_token(params[:invite][:token])
+    end
+  end
+  
+  helper_method :invite
 end

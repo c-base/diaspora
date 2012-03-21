@@ -1,39 +1,42 @@
-app.views.Base =  Backbone.View.extend({
+app.views.Base = Backbone.View.extend({
+
+  initialize : function(options) {
+    this.setupRenderEvents();
+  },
+
   presenter : function(){
     return this.defaultPresenter()
   },
 
   setupRenderEvents : function(){
     this.model.bind('remove', this.remove, this);
-    this.model.bind('change', this.render, this);
+
+    // this line is too generic.  we usually only want to re-render on
+    // feedback changes as the post content, author, and time do not change.
+    //
+    // this.model.bind('change', this.render, this);
   },
 
   defaultPresenter : function(){
     var modelJson = this.model ? this.model.toJSON() : {}
-    return _.extend(modelJson, {current_user: app.user()});
+    return _.extend(modelJson, {
+      current_user : app.currentUser.attributes,
+      loggedIn : app.currentUser.authenticated()
+    });
   },
 
   render : function() {
     this.renderTemplate()
     this.renderSubviews()
     this.renderPluginWidgets()
+    this.removeTooltips()
 
     return this
   },
 
   renderTemplate : function(){
-    var templateHTML //don't forget to regenerate your jasmine fixtures ;-)
     var presenter = _.isFunction(this.presenter) ? this.presenter() : this.presenter
-
-    if(this.legacyTemplate) {
-      templateHTML = $(this.template_name).html();
-      this.template = _.template(templateHTML);
-    } else {
-      window.templateCache = window.templateCache || {}
-      templateHTML = $("#" + this.templateName + "-template").html(); //don't forget to regenerate your jasmine fixtures ;-)
-      this.template = templateCache[this.templateName] = templateCache[this.templateName] || Handlebars.compile(templateHTML);
-    }
-
+    this.template = JST[this.templateName]
     $(this.el).html(this.template(presenter));
     this.postRenderTemplate();
   },
@@ -54,5 +57,9 @@ app.views.Base =  Backbone.View.extend({
   renderPluginWidgets : function() {
     this.$(this.tooltipSelector).twipsy();
     this.$("time").timeago();
+  },
+
+  removeTooltips : function() {
+    $(".twipsy").remove();
   }
-})
+});

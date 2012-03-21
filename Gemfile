@@ -1,18 +1,21 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.0.11'
-
-gem 'bundler', '>= 1.0.0'
+gem 'rails', '3.1.4'
+gem 'rails_autolink'
+gem 'bundler', '~> 1.1.0'
 gem 'foreman', '0.34.1'
 gem 'whenever'
 
-gem 'thin', '~> 1.3.1', :require => false
+gem 'thin', '~> 1.3.1',    :require => false
+
+# cross-origin resource sharing
+
+gem 'rack-cors', '~> 0.2.4', :require => 'rack/cors'
 
 # authentication
 
 gem "devise_ldap_authenticatable", :git => "git://github.com/cschiewek/devise_ldap_authenticatable.git"
 gem 'devise', '1.5.3'
-gem 'devise_invitable', :git => "git://github.com/scambra/devise_invitable.git"
 gem 'jwt'
 gem 'oauth2-provider', '0.0.19'
 
@@ -25,29 +28,31 @@ gem 'twitter', '2.0.2'
 
 # mail
 
-gem 'messagebus_ruby_api', '1.0.1'
+gem 'messagebus_ruby_api', '1.0.3'
+gem 'airbrake'
+gem 'newrelic_rpm'
+gem "rpm_contrib", "~> 2.1.7"
 
 group :production do # we don't install these on travis to speed up test runs
-  # reporting
-  gem 'airbrake', :require => false
-  gem 'newrelic_rpm', :require => false
+  gem 'rack-ssl', :require => 'rack/ssl'
+  gem 'rack-rewrite', '~> 1.2.1', :require => false
   gem 'rack-google-analytics', :require => 'rack/google-analytics'
   gem 'rack-piwik', :require => 'rack/piwik'
-  gem 'rack-ssl', :require => 'rack/ssl'
 end
 
 # configuration
 
 group :heroku do
   gem 'pg'
+  gem 'unicorn', '~> 4.2.0', :require => false
 end
 
 gem 'settingslogic', :git => 'git://github.com/binarylogic/settingslogic.git'
 # database
 
-gem 'activerecord-import'
+gem "activerecord-import", "~> 0.2.9"
 gem 'foreigner', '~> 1.1.0'
-gem 'mysql2', '0.2.18' if ENV['DB'].nil? || ENV['DB'] == 'all' || ENV['DB'] == 'mysql'
+gem 'mysql2', '0.3.11' if ENV['DB'].nil? || ENV['DB'] == 'all' || ENV['DB'] == 'mysql'
 gem 'pg' if ENV['DB'] == 'all' || ENV['DB'] == 'postgres'
 gem 'sqlite3' if ENV['DB'] == 'all' || ENV['DB'] == 'sqlite'
 
@@ -59,7 +64,7 @@ gem 'fastercsv', '1.5.4', :require => false
 gem 'mini_magick', '3.4'
 gem 'rest-client', '1.6.7'
 
-gem 'jammit', '0.6.5'
+gem 'jammit-s3'
 
 # JSON and API
 
@@ -73,15 +78,15 @@ gem 'rails-i18n'
 
 # parsing
 
-gem 'nokogiri', '~> 1.5.0'
+gem 'nokogiri', '1.5.0'
 gem 'redcarpet', "2.0.1"
 gem 'roxml', :git => 'git://github.com/Empact/roxml.git', :ref => '7ea9a9ffd2338aaef5b0'
-gem 'ruby-oembed'
+gem 'ruby-oembed', '~> 0.8.7'
 
 # queue
 
-gem 'resque', '1.19.0'
-gem 'resque-ensure-connected'
+gem 'resque', '1.20.0'
+gem 'resque-ensure-connected', :git => 'git://github.com/socialcast/resque-ensure-connected.git'
 gem 'resque-timeout', '1.0.0'
 gem 'SystemTimer', '1.2.3', :platforms => :ruby_18
 
@@ -107,7 +112,7 @@ gem 'client_side_validations'
 
 gem 'faraday'
 gem 'faraday-stack'
-gem 'em-synchrony', :platforms => :ruby_19
+gem 'em-synchrony', '1.0.0', :platforms => :ruby_19
 
 # jazzy jasmine
 
@@ -140,7 +145,7 @@ end
 
 group :development do
   gem 'heroku'
-  gem 'heroku_san'
+  gem 'heroku_san', '1.3.0'
   gem 'capistrano', '~> 2.9.0', :require => false
   gem 'capistrano_colors', :require => false
   gem 'capistrano-ext', '1.2.1', :require => false
@@ -151,6 +156,9 @@ group :development do
   gem 'ruby-debug', :platforms => :mri_18
   gem 'yard', :require => false
 
-  # speed up development requests (already pulled into rails 3.2)
+  # rails 3.2 goodness
   gem 'active_reload'
+
+  # for tracing AR object instantiation and memory usage per request
+  gem 'oink'
 end
